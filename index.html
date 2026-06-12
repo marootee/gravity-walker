@@ -1048,11 +1048,50 @@ function flip(){
   addParticles(player.x,player.y,getSkinCol(),8,false);
   tapEl.classList.toggle('flip', player.grav===-1);
 }
+function triggerRetry() {
+  // Ask Android app to show interstitial on retry (if running inside the app)
+  try {
+    if (window.Android && Android.showAdOnRetry) {
+      Android.showAdOnRetry();
+    }
+  } catch (e) {
+    console.log('Ad call failed:', e);
+  }
 
+  // Restart game if we're in dead state
+  if (state === 'dead') {
+    init();
+  }
+}
 // Touch/click events — prevent default to stop mobile zoom/scroll
-document.getElementById('tap').addEventListener('pointerdown', e=>{ e.preventDefault(); flip(); }, {passive:false});
-document.getElementById('cv').addEventListener('pointerdown',  e=>{ e.preventDefault(); flip(); }, {passive:false});
-document.addEventListener('keydown', e=>{
+document.getElementById('tap').addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if (state === 'dead') {
+    triggerRetry();
+  } else {
+    flip();
+  }
+}, { passive: false });
+
+document.getElementById('cv').addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if (state === 'dead') {
+    triggerRetry();
+  } else {
+    flip();
+  }
+}, { passive: false });
+
+document.addEventListener('keydown', e => {
+  if (['Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
+    e.preventDefault();
+    if (state === 'dead') {
+      triggerRetry();
+    } else {
+      flip();
+    }
+  }
+});
   if(['Space','ArrowUp','ArrowDown'].includes(e.code)){ e.preventDefault(); flip(); }
 });
 
